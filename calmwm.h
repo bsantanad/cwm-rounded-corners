@@ -495,6 +495,7 @@ void			 kbfunc_ptrmove(void *, struct cargs *);
 void			 kbfunc_client_snap(void *, struct cargs *);
 void			 kbfunc_client_move(void *, struct cargs *);
 void			 kbfunc_client_resize(void *, struct cargs *);
+void			 kbfunc_client_tile(void *, struct cargs *);
 void			 kbfunc_client_close(void *, struct cargs *);
 void			 kbfunc_client_lower(void *, struct cargs *);
 void			 kbfunc_client_raise(void *, struct cargs *);

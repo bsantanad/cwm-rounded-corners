@@ -301,28 +301,77 @@ kbfunc_client_snap(void *ctx, struct cargs *cargs)
 	    cc->geom.y + cc->geom.h / 2, 1);
 
 	flags = cargs->flag;
-	while (flags) {
-		if (flags & CWM_UP) {
-			cc->geom.y = area.y;
-			flags &= ~CWM_UP;
+
+	if (flags) {
+		while (flags) {
+			if (flags & CWM_UP) {
+				cc->geom.y = area.y;
+				flags &= ~CWM_UP;
+			}
+			if (flags & CWM_LEFT) {
+				cc->geom.x = area.x;
+				flags &= ~CWM_LEFT;
+			}
+			if (flags & CWM_RIGHT) {
+				cc->geom.x = area.x + area.w - cc->geom.w -
+					(cc->bwidth * 2);
+				flags &= ~CWM_RIGHT;
+			}
+			if (flags & CWM_DOWN) {
+				cc->geom.y = area.y + area.h - cc->geom.h -
+					(cc->bwidth * 2);
+				flags &= ~CWM_DOWN;
+			}
 		}
-		if (flags & CWM_LEFT) {
-			cc->geom.x = area.x;
-			flags &= ~CWM_LEFT;
-		}
-		if (flags & CWM_RIGHT) {
-			cc->geom.x = area.x + area.w - cc->geom.w -
-			    (cc->bwidth * 2);
-			flags &= ~CWM_RIGHT;
-		}
-		if (flags & CWM_DOWN) {
-			cc->geom.y = area.y + area.h - cc->geom.h -
-			    (cc->bwidth * 2);
-			flags &= ~CWM_DOWN;
-		}
+	} else {
+		cc->geom.x = area.x + (area.w - cc->geom.w) / 2 - cc->bwidth;
+		cc->geom.y = area.y + (area.h - cc->geom.h) / 2 - cc->bwidth;
 	}
+
 	client_move(cc);
 	client_ptr_inbound(cc, 1);
+}
+
+void
+kbfunc_client_tile(void *ctx, struct cargs *cargs)
+{
+	struct client_ctx *cc = ctx;
+	struct screen_ctx *sc = cc->sc;
+	struct geom area;
+	int flags;
+
+	area = screen_area(sc,
+	    cc->geom.x + cc->geom.w / 2,
+	    cc->geom.y + cc->geom.h / 2, 1);
+
+	flags = cargs->flag;
+
+	if (flags & CWM_UP) {
+		cc->geom.y = area.y;
+		cc->geom.h = area.h / 2 - (cc->bwidth * 2);
+	} else if (flags & CWM_DOWN) {
+		cc->geom.y = area.y + area.h / 2;
+		cc->geom.h = area.h / 2 - (cc->bwidth * 2);
+	} else {
+		cc->geom.y = area.y;
+		cc->geom.h = area.h - (cc->bwidth * 2);
+	}
+
+	if (flags & CWM_LEFT) {
+		cc->geom.x = area.x;
+		cc->geom.w = area.w / 2 - (cc->bwidth * 2);
+	} else if (flags & CWM_RIGHT) {
+		cc->geom.x = area.x + area.w / 2;
+		cc->geom.w = area.w / 2 - (cc->bwidth * 2);
+	} else {
+		cc->geom.x = area.x;
+		cc->geom.w = area.w - (cc->bwidth * 2);
+	}
+
+	client_resize(cc, 1);
+	client_move(cc);
+	client_ptr_inbound(cc, 1);
+	XSync(X_Dpy, True);
 }
 
 void
