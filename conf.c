@@ -281,6 +281,7 @@ conf_init(struct conf *c)
 
 	c->stickygroups = 0;
 	c->bwidth = 1;
+	c->cradius = 0;
 	c->mamount = 1;
 	c->htile = 50;
 	c->vtile = 50;

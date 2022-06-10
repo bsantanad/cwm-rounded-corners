@@ -72,7 +72,7 @@ typedef struct {
 %token	FONTNAME STICKY GAP
 %token	AUTOGROUP COMMAND IGNORE WM
 %token	YES NO BORDERWIDTH MOVEAMOUNT HTILE VTILE
-%token	COLOR SNAPDIST
+%token	COLOR SNAPDIST CORNERRADIUS
 %token	ACTIVEBORDER INACTIVEBORDER URGENCYBORDER
 %token	GROUPBORDER UNGROUPBORDER
 %token	MENUBG MENUFG
@@ -132,6 +132,14 @@ main		: FONTNAME STRING		{
 				YYERROR;
 			}
 			conf->bwidth = $2;
+		}
+
+		| CORNERRADIUS NUMBER {
+		    if ($2 < 0 || $2 > INT_MAX) {
+				yyerror("invalid cornerradius");
+				YYERROR;
+			}
+			conf->cradius = $2;
 		}
 		| HTILE NUMBER {
 			if ($2 < 0 || $2 > 99) {
@@ -337,6 +345,7 @@ lookup(char *s)
 		{ "borderwidth",	BORDERWIDTH},
 		{ "color",		COLOR},
 		{ "command",		COMMAND},
+		{ "cornerradius",	CORNERRADIUS},
 		{ "font",		FONTCOLOR},
 		{ "fontname",		FONTNAME},
 		{ "gap",		GAP},

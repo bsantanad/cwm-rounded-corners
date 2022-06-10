@@ -28,6 +28,7 @@
 #include <X11/Xproto.h>
 #include <X11/Xutil.h>
 #include <X11/cursorfont.h>
+#include <X11/extensions/shape.h>
 #include <X11/extensions/Xrandr.h>
 #include <X11/keysym.h>
 
@@ -305,6 +306,7 @@ struct conf {
 	char			*known_hosts;
 	char			*wm_argv;
 	int			 debug;
+	int			 cradius;
 };
 
 /* MWM hints */

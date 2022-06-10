@@ -35,6 +35,7 @@ static void			 client_class_hint(struct client_ctx *);
 static void			 client_placement(struct client_ctx *);
 static void			 client_mwm_hints(struct client_ctx *);
 static void			 client_wm_protocols(struct client_ctx *);
+static void			 client_round_corners(struct client_ctx *, Display *);
 
 struct client_ctx *
 client_init(Window win, struct screen_ctx *sc)
@@ -597,6 +598,49 @@ client_draw_border(struct client_ctx *cc)
 
 	XSetWindowBorderWidth(X_Dpy, cc->win, (unsigned int)cc->bwidth);
 	XSetWindowBorder(X_Dpy, cc->win, pixel);
+	client_round_corners(cc, X_Dpy);
+}
+
+static void
+client_round_corners(struct client_ctx *cc, Display *d)
+{
+	unsigned int ww, wh, bw, rad, dia;
+
+	ww = cc->geom.w;
+	wh = cc->geom.h;
+	bw = cc->bwidth;
+	rad = Conf.cradius;
+	dia = 2 * rad;
+
+	if (rad <= 0 || (cc->flags & CLIENT_FULLSCREEN))
+		return;
+
+	if (ww < dia || wh < dia) return;
+
+	Pixmap mask = XCreatePixmap(d, cc->win, ww + 2 * bw, wh + 2 * bw, 1);
+
+	if (!mask) return;
+
+	XGCValues xgcv;
+	GC shape_gc = XCreateGC(d, mask, 0, &xgcv);
+
+	if (!shape_gc) {
+		XFreePixmap(d, mask);
+		return;
+	}
+
+	XSetForeground(d, shape_gc, 0);
+	XFillRectangle(d, mask, shape_gc, 0, 0, ww + 2 * bw, wh + 2 * bw);
+	XSetForeground(d, shape_gc, 1);
+	XFillArc(d, mask, shape_gc, 0, 0, dia, dia, 0, 23040);
+	XFillArc(d, mask, shape_gc, ww+2*bw-dia-1, 0, dia, dia, 0, 23040);
+	XFillArc(d, mask, shape_gc, 0, wh+2*bw-dia-1, dia, dia, 0, 23040);
+	XFillArc(d, mask, shape_gc, ww+2*bw-dia-1, wh+2*bw-dia-1, dia, dia, 0, 23040);
+	XFillRectangle(d, mask, shape_gc, rad, 0, ww-dia+2*bw, wh+2*bw);
+	XFillRectangle(d, mask, shape_gc, 0, rad, ww+2*bw, wh-dia+2*bw);
+	XShapeCombineMask(d, cc->win, ShapeBounding, -bw, -bw, mask, ShapeSet);
+	XFreePixmap(d, mask);
+	XFreeGC(d, shape_gc);
 }
 
 static void
